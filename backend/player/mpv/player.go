@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -111,6 +112,12 @@ func (p *Player) Init(maxCacheMB int) error {
 		m.SetOptionString("prefetch-playlist", "yes")
 		m.SetOptionString("force-seekable", "yes")
 		m.SetOptionString("terminal", "no")
+		if runtime.GOOS == "darwin" {
+			// AVFoundation participates in macOS Spatial Audio. Preserve the
+			// source channel layout so macOS can spatialize multichannel audio.
+			m.SetOptionString("ao", "avfoundation")
+			m.SetOptionString("audio-channels", "auto")
+		}
 
 		// limit in-memory cache size
 		maxBackMB := maxCacheMB / 3
